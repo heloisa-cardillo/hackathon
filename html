@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criar Formulário / Pesquisa</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #f8f9fc; color: #1a1a2e; padding: 40px 20px; display: flex; justify-content: center; }
+  .container { width: 100%; max-width: 760px; }
+  h1 { font-size: 24px; margin-bottom: 20px; color: #003087; text-align: center; }
+
+  /* Navegação principal em Abas */
+  .main-tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #e0e0e0; }
+  .tab-btn {
+    padding: 12px 20px; font-size: 15px; font-weight: 700; background: none; border: none;
+    border-bottom: 3px solid transparent; color: #666; cursor: pointer; transition: 0.2s;
+  }
+  .tab-btn.ativo { color: #003087; border-bottom-color: #003087; }
+
+  .view-content { display: none; }
+  .view-content.visivel { display: block; }
+
+  /* Grid dos 4 Cards de Tipos de Pesquisa */
+  .grid-tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .card-tipo {
+    background: #fff; border: 2px solid #e0e0e0; border-radius: 10px; padding: 18px;
+    cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .card-tipo:hover { border-color: #003087; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,48,135,0.08); }
+  .card-tipo h3 { font-size: 16px; color: #003087; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .card-tipo .badge { font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #e0e8f5; color: #003087; }
+  .card-tipo p { font-size: 13px; color: #444; line-height: 1.4; margin-bottom: 12px; }
+  .card-tipo .mini-instrucoes {
+    background: #f0f4fa; padding: 10px; border-radius: 6px; font-size: 12px; color: #333; margin-top: auto;
+  }
+  .card-tipo .mini-instrucoes strong { display: block; color: #003087; margin-bottom: 4px; }
+  .card-tipo .mini-instrucoes ol { padding-left: 16px; }
+  .card-tipo .btn-escolher {
+    margin-top: 14px; width: 100%; padding: 8px; background: #003087; color: #fff;
+    border: none; border-radius: 6px; font-size: 13px; font-weight: 600; text-align: center;
+  }
+
+  /* Formulário de Criação */
+  .form-container { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .header-tipo-selecionado {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; margin-bottom: 20px; border-bottom: 1px solid #eee;
+  }
+  .header-tipo-selecionado h2 { font-size: 18px; color: #003087; }
+  .btn-trocar-tipo { background: none; border: 1px solid #003087; color: #003087; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+  .campo { margin-bottom: 20px; }
+  .campo label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #333; }
+  .campo textarea, .campo input {
+    width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px;
+    font-size: 14px; resize: vertical;
+  }
+  .campo textarea:focus, .campo input:focus { outline: none; border-color: #ff6a00; }
+  .hint { font-size: 12px; color: #777; margin-top: 4px; }
+
+  .alternativas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .switch-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .switch { position: relative; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: #ccc; border-radius: 24px; cursor: pointer; transition: 0.2s; }
+  .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+  .switch input:checked + .slider { background: #ff6a00; }
+  .switch input:checked + .slider::before { transform: translateX(20px); }
+  .switch-row span { font-size: 14px; color: #333; }
+
+  .secao-form { display: none; }
+  .secao-form.visivel { display: block; }
+
+  .btn-salvar {
+    width: 100%; padding: 14px; background: #ff6a00; color: #fff; border: none;
+    border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  }
+  .btn-salvar:hover { background: #e65f00; }
+
+  /* Lista de Formulários Criados */
+  .lista-formularios { margin-top: 40px; }
+  .lista-formularios h2 { font-size: 18px; color: #003087; margin-bottom: 12px; }
+  .form-card {
+    border: 1px solid #e0e0e0; border-left: 5px solid #003087; border-radius: 6px;
+    padding: 14px 16px; margin-bottom: 12px; background: #fff;
+  }
+  .form-card.tipo-quantitative { border-left-color: #ff6a00; }
+  .form-card.tipo-discovery { border-left-color: #00a86b; }
+  .form-card.tipo-usabilidade { border-left-color: #8e44ad; }
+
+  .form-card .tag {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 10px; background: #003087; color: #fff; margin-bottom: 6px;
+  }
+  .form-card.tipo-quantitative .tag { background: #ff6a00; }
+  .form-card.tipo-discovery .tag { background: #00a86b; }
+  .form-card.tipo-usabilidade .tag { background: #8e44ad; }
+
+  .form-card p { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+  .form-card .kws { font-size: 12px; color: #666; margin-top: 4px; }
+  .form-card .card-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .btn-simular {
+    background: #003087; color: #fff; border: none; padding: 6px 14px;
+    border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .form-card.tipo-quantitative .btn-simular { background: #ff6a00; }
+  .form-card.tipo-discovery .btn-simular { background: #00a86b; }
+  .form-card.tipo-usabilidade .btn-simular { background: #8e44ad; }
+
+  /* Modal de Simulação */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-overlay.aberto { display: flex; }
+  .modal {
+    background: #fff; border-radius: 10px; width: 90%; max-width: 500px;
+    max-height: 85vh; overflow-y: auto; padding: 24px; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 16px; background: none; border: none;
+    font-size: 20px; cursor: pointer; color: #999;
+  }
+  .modal h3 { color: #003087; font-size: 17px; margin-bottom: 16px; padding-right: 20px; }
+  .modal .pergunta-sim { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+
+  .opcoes-sim { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .opcao-sim-btn {
+    padding: 12px 8px; border: 2px solid #ff6a00; border-radius: 8px; background: #fff;
+    color: #ff6a00; font-weight: 600; cursor: pointer; font-size: 13px; text-align: center;
+  }
+  .opcao-sim-btn:hover { background: #fff3ea; }
+  .opcao-sim-btn.selecionada { background: #ff6a00; color: #fff; }
+  .btn-regerar {
+    width: 100%; padding: 8px; background: #f0f4fa; color: #003087; border: 1px dashed #003087;
+    border-radius: 6px; font-size: 12px; cursor: pointer; margin-bottom: 12px;
+  }
+  .resultado-sim { font-size: 13px; color: #333; background: #f5f5f5; padding: 10px; border-radius: 6px; }
+
+  .chat-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; max-height: 320px; overflow-y: auto; }
+  .msg { padding: 10px 12px; border-radius: 10px; font-size: 14px; max-width: 85%; }
+  .msg.ia { background: #f0f4fa; color: #003087; align-self: flex-start; }
+  .msg.user { background: #ff6a00; color: #fff; align-self: flex-end; }
+  .chat-input-row { display: flex; gap: 8px; }
+  .chat-input-row input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  .chat-input-row button {
+    padding: 10px 16px; background: #003087; color: #fff; border: none; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .chat-fim { text-align: center; font-size: 12px; color: #888; margin-top: 8px; }
+
+  .task-box { background: #fff8f0; border: 1px solid #ffe0c2; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Criar Pesquisa / Formulário</h1>
+
+  <!-- Navegação das Vistas -->
+  <div class="main-tabs">
+    <button class="tab-btn ativo" id="tab-escolha" onclick="mostrarAba('escolha')">1. Escolher Tipo de Pesquisa</button>
+    <button class="tab-btn" id="tab-preenchimento" onclick="mostrarAba('preenchimento')" disabled>2. Preencher Detalhes</button>
+  </div>
+
+  <!-- ABA 1: Visão Geral e Escolha dos 4 Tipos -->
+  <div class="view-content visivel" id="view-escolha">
+    <div class="grid-tipos">
+
+      <!-- Tipo 1: Qualitative -->
+      <div class="card-tipo" onclick="selecionarTipo('qualitative')">
+        <div>
+          <h3>User Research Qualitative <span class="badge">Conversacional</span></h3>
+          <p>Coleta insights profundos por meio de um diálogo interativo guiado por IA, adaptando as perguntas ao contexto informado.</p>
+        </div>
+        <div class="mini-instrucoes">
+          <strong>Como funciona:</strong>
+          <ol>
+            <li>Defina a pergunta principal e o objetivo do estudo.</li>
+            <li>A IA conduz a conversa de forma natural.</li>
+            <li>Perfeito para entender motivações e dores do usuário.</li>
+          </ol>
+        </div>
+        <button class="btn-escolher">Selecionar Qualitativa</button>
+      </div>
+
+      <!-- Tipo 2: Quantitative -->
+      <div class="card-tipo" onclick="selecionarTipo('quantitative')">
+        <div>
+          <h3>User Research Quantitative <span class="badge" style="background:#fff3ea; color:#ff6a00;">Múltipla Escolha</span></h3>
+          <p>Mede opções e escolhas objetivas. Permite variação por IA nas palavras-chave para evitar vícios de formulação.</p>
+        </div>
+        <div class="mini-instrucoes">
+          <strong>Como funciona:</strong>
+          <ol>
+            <li>Insira a pergunta-base e 4 opções-chave.</li>
+            <li>A IA pode reescrever as alternativas a cada exibição.</li>
+            <li>Ideal para métricas objetivas e comparações rápidas.</li>
+          </ol>
+        </div>
+        <button class="btn-escolher" style="background:#ff6a00;">Selecionar Quantitativa</button>
+      </div>
+
+      <!-- Tipo 3: Discovery Interview -->
+      <div class="card-tipo" onclick="selecionarTipo('discovery')">
+        <div>
+          <h3>Discovery Interview <span class="badge" style="background:#e6f7f0; color:#00a86b;">Entrevista</span></h3>
+          <p>Método fundacional de User Research. Usado para mapear fluxos e comportamentos. A regra de Nielsen mostra que 5 a 8 participantes já revelam cerca de 85% dos principais temas.</p>
+        </div>
+        <div class="mini-instrucoes">
+          <strong>Mini-instrução do Pulso:</strong>
+          <ol>
+            <li>Defina o tema em uma frase curta.</li>
+            <li>Recrute de 5 a 8 pessoas do público-alvo.</li>
+            <li>Siga o roteiro fixo: 4 a 6 perguntas abertas.</li>
+            <li>Use aprofundamentos sugeridos em respostas vagas.</li>
+            <li>O Pulso faz a síntese e categorização por tema.</li>
+          </ol>
+        </div>
+        <button class="btn-escolher" style="background:#00a86b;">Selecionar Discovery</button>
+      </div>
+
+      <!-- Tipo 4: Usabilidade com Tarefa -->
+      <div class="card-tipo" onclick="selecionarTipo('usabilidade')">
+        <div>
+          <h3>Teste de Usabilidade <span class="badge" style="background:#f4ecf7; color:#8e44ad;">Orientado a Tarefa</span></h3>
+          <p>Avalia a usabilidade prática de um protótipo ou funcionalidade através da execução de cenários e tarefas reais por parte do usuário.</p>
+        </div>
+        <div class="mini-instrucoes">
+          <strong>Como funciona:</strong>
+          <ol>
+            <li>Descreva o cenário e o objetivo prático.</li>
+            <li>Peça para o usuário executar a ação enquanto pensa alto.</li>
+            <li>Avalie tempo de conclusão e taxa de sucesso.</li>
+          </ol>
+        </div>
+        <button class="btn-escolher" style="background:#8e44ad;">Selecionar Usabilidade</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ABA 2: Formulário de Preenchimento do Tipo Escolhido -->
+  <div class="view-content" id="view-preenchimento">
+    <div class="form-container">
+      <div class="header-tipo-selecionado">
+        <h2 id="titulo-tipo-atual">Preencher Formulário</h2>
+        <button class="btn-trocar-tipo" onclick="mostrarAba('escolha')">← Trocar tipo de pesquisa</button>
+      </div>
+
+      <div class="campo">
+        <label for="pergunta-base" id="lbl-pergunta-base">Pergunta-base ou Tema Principal</label>
+        <textarea id="pergunta-base" rows="2" placeholder="Ex: Como você decide onde investir no início do mês?"></textarea>
+      </div>
+
+      <!-- Seção Qualitativa (Conversacional) -->
+      <div class="secao-form" id="secao-qualitative">
+        <div class="campo">
+          <label for="contexto-qualitative">Contexto / Objetivo da Pesquisa</label>
+          <textarea id="contexto-qualitative" rows="3" placeholder="Explique para a IA o que essa conversa deve descobrir, para guiar a condução do diálogo."></textarea>
+        </div>
+      </div>
+
+      <!-- Seção Quantitativa (Múltipla Escolha) -->
+      <div class="secao-form" id="secao-quantitative">
+        <div class="campo">
+          <label>Palavras-chave das 4 alternativas</label>
+          <div class="alternativas-grid">
+            <input type="text" id="kw1" placeholder="Alternativa 1">
+            <input type="text" id="kw2" placeholder="Alternativa 2">
+            <input type="text" id="kw3" placeholder="Alternativa 3">
+            <input type="text" id="kw4" placeholder="Alternativa 4">
+          </div>
+          <div class="hint">A IA vai reformular essas palavras a cada geração para evitar viés (ex: "macarrão" pode virar "massa").</div>
+        </div>
+
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" id="variar-ia" checked>
+            <span class="slider"></span>
+          </label>
+          <span>IA varia as palavras a cada exibição</span>
+        </div>
+      </div>
+
+      <!-- Seção Discovery Interview -->
+      <div class="secao-form" id="secao-discovery">
+        <div class="campo">
+          <label for="roteiro-discovery">Roteiro de Perguntas Abertas (4 a 6 perguntas)</label>
+          <textarea id="roteiro-discovery" rows="4" placeholder="1. Conte como foi a última vez que você fez X...
+2. O que foi mais difícil nesse processo?
+3. Como você resolveu esse problema?"></textarea>
+          <div class="hint">Dica: Durante a entrevista, a tela oferecerá aprofundamentos automáticos como "Me dá um exemplo real disso?".</div>
+        </div>
+      </div>
+
+      <!-- Seção Usabilidade com Tarefa -->
+      <div class="secao-form" id="secao-usabilidade">
+        <div class="campo">
+          <label for="cenario-usabilidade">Cenário e Instrução da Tarefa</label>
+          <textarea id="cenario-usabilidade" rows="3" placeholder="Ex: Você quer transferir R$ 50 para um amigo. Navegue pela tela até concluir o envio."></textarea>
+        </div>
+        <div class="campo">
+          <label for="link-proto">Link do Protótipo/Fluxo (Figma, Web, etc.)</label>
+          <input type="text" id="link-proto" placeholder="https://figma.com/file/...">
+        </div>
+      </div>
+
+      <button class="btn-salvar" onclick="salvarFormulario()">Salvar e Criar Pesquisa</button>
+    </div>
+  </div>
+
+  <!-- Lista Geral de Pesquisas Criadas -->
+  <div class="lista-formularios">
+    <h2>Pesquisas Criadas</h2>
+    <div id="lista"></div>
+  </div>
+</div>
+
+<!-- Modal de Simulação -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal()">&times;</button>
+    <h3>Simulação — Como o Usuário Verá</h3>
+    <div id="modal-conteudo"></div>
+  </div>
+</div>
+
+<script>
+  let tipoSelecionado = 'qualitative';
+
+  let formularios = [
+    {
+      tipo: 'quantitative',
+      pergunta: 'Qual é a sua comida favorita?',
+      palavrasChave: ['lasanha', 'feijão tropeiro', 'sushi', 'churrasco'],
+      variarIA: true
+    },
+    {
+      tipo: 'discovery',
+      pergunta: 'Como as pessoas decidem se vão investir no início do mês',
+      roteiro: '1. O que você costuma fazer quando recebe o salário?\n2. Como decide quanto vai guardar ou investir?\n3. Qual a maior dificuldade nesse momento?'
+    }
+  ];
+
+  const sinonimos = {
+    'lasanha': ['lasanha', 'massa gratinada', 'prato italiano com camadas'],
+    'feijão tropeiro': ['feijão tropeiro', 'prato mineiro com farofa', 'feijão com bacon e farofa'],
+    'sushi': ['sushi', 'comida japonesa', 'peixe cru enrolado em arroz'],
+    'churrasco': ['churrasco', 'carne na brasa', 'churrasco de fim de semana']
+  };
+
+  const followUps = [
+    'Interessante! Pode me contar um pouco mais sobre isso?',
+    'Entendi. O que mais pesa nessa escolha pra você?',
+    'Me dá um exemplo real de quando isso aconteceu?'
+  ];
+
+  function mostrarAba(aba) {
+    document.getElementById('tab-escolha').classList.toggle('ativo', aba === 'escolha');
+    document.getElementById('tab-preenchimento').classList.toggle('ativo', aba === 'preenchimento');
+    
+    document.getElementById('view-escolha').classList.toggle('visivel', aba === 'escolha');
+    document.getElementById('view-preenchimento').classList.toggle('visivel', aba === 'preenchimento');
+  }
+
+  function selecionarTipo(tipo) {
+    tipoSelecionado = tipo;
+    
+    // Atualiza os títulos e rótulos conforme o tipo escolhido
+    const titulos = {
+      'qualitative': 'User Research Qualitative (Conversacional)',
+      'quantitative': 'User Research Quantitative (Múltipla Escolha)',
+      'discovery': 'Entrevista de Descoberta (Discovery Interview)',
+      'usabilidade': 'Teste de Usabilidade com Tarefa'
+    };
+    
+    document.getElementById('titulo-tipo-atual').textContent = titulos[tipo];
+    
+    // Exibe a seção específica do formulário
+    document.querySelectorAll('.secao-form').forEach(el => el.classList.remove('visivel'));
+    document.getElementById(`secao-${tipo}`).classList.add('visivel');
+    
+    // Habilita e navega para a aba de preenchimento
+    document.getElementById('tab-preenchimento').disabled = false;
+    mostrarAba('preenchimento');
+  }
+
+  function salvarFormulario() {
+    const pergunta = document.getElementById('pergunta-base').value.trim();
+
+    if (!pergunta) {
+      alert('Preencha a pergunta-base ou tema principal.');
+      return;
+    }
+
+    let form = { tipo: tipoSelecionado, pergunta };
+
+    if (tipoSelecionado === 'qualitative') {
+      form.contexto = document.getElementById('contexto-qualitative').value.trim();
+    } else if (tipoSelecionado === 'quantitative') {
+      const kws = [
+        document.getElementById('kw1').value.trim(),
+        document.getElementById('kw2').value.trim(),
+        document.getElementById('kw3').value.trim(),
+        document.getElementById('kw4').value.trim()
+      ];
+      if (kws.some(k => !k)) {
+        alert('Preencha as 4 palavras-chave.');
+        return;
+      }
+      form.palavrasChave = kws;
+      form.variarIA = document.getElementById('variar-ia').checked;
+    } else if (tipoSelecionado === 'discovery') {
+      form.roteiro = document.getElementById('roteiro-discovery').value.trim();
+    } else if (tipoSelecionado === 'usabilidade') {
+      form.cenario = document.getElementById('cenario-usabilidade').value.trim();
+      form.link = document.getElementById('link-proto').value.trim();
+    }
+
+    formularios.push(form);
+    renderLista();
+    limparCampos();
+    mostrarAba('escolha');
+  }
+
+  function limparCampos() {
+    document.getElementById('pergunta-base').value = '';
+    document.getElementById('contexto-qualitative').value = '';
+    document.getElementById('roteiro-discovery').value = '';
+    document.getElementById('cenario-usabilidade').value = '';
+    document.getElementById('link-proto').value = '';
+    ['kw1','kw2','kw3','kw4'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  function renderLista() {
+    const lista = document.getElementById('lista');
+    lista.innerHTML = '';
+
+    const nomesTipos = {
+      'qualitative': 'User Research Qualitative',
+      'quantitative': 'User Research Quantitative',
+      'discovery': 'Discovery Interview',
+      'usabilidade': 'Teste de Usabilidade'
+    };
+
+    formularios.forEach((f, i) => {
+      const card = document.createElement('div');
+      card.className = `form-card tipo-${f.tipo}`;
+      
+      let html = `<span class="tag">${nomesTipos[f.tipo] || f.tipo}</span>`;
+      html += `<p>${f.pergunta}</p>`;
+
+      if (f.tipo === 'quantitative') {
+        html += `<div class="kws">Palavras-chave: ${f.palavrasChave.join(', ')} — IA varia: ${f.variarIA ? 'sim' : 'não'}</div>`;
+      } else if (f.tipo === 'qualitative' && f.contexto) {
+        html += `<div class="kws">Contexto: ${f.contexto}</div>`;
+      } else if (f.tipo === 'discovery' && f.roteiro) {
+        html += `<div class="kws">Roteiro cadastrado com perguntas abertas.</div>`;
+      } else if (f.tipo === 'usabilidade') {
+        html += `<div class="kws">Cenário: ${f.cenario || 'Instrução de tarefa'}</div>`;
+      }
+
+      html += `<div class="card-footer"><button class="btn-simular" onclick="simular(${i})">Simular Pesquisa</button></div>`;
+      card.innerHTML = html;
+      lista.appendChild(card);
+    });
+  }
+
+  function variarPalavra(kw) {
+    const chave = kw.trim().toLowerCase();
+    const opcoes = sinonimos[chave] || [kw];
+    return opcoes[Math.floor(Math.random() * opcoes.length)];
+  }
+
+  function simular(index) {
+    const f = formularios[index];
+    const modalConteudo = document.getElementById('modal-conteudo');
+
+    if (f.tipo === 'quantitative') {
+      renderSimulacaoQuantitative(f, index, modalConteudo);
+    } else if (f.tipo === 'discovery' || f.tipo === 'qualitative') {
+      renderSimulacaoConversacional(f, modalConteudo);
+    } else if (f.tipo === 'usabilidade') {
+      renderSimulacaoUsabilidade(f, modalConteudo);
+    }
+
+    document.getElementById('modal-overlay').classList.add('aberto');
+  }
+
+  function renderSimulacaoQuantitative(f, index, container) {
+    const palavras = f.variarIA ? f.palavrasChave.map(variarPalavra) : f.palavrasChave;
+
+    let html = `<div class="pergunta-sim">${f.pergunta}</div>`;
+    html += `<div class="opcoes-sim">`;
+    palavras.forEach(p => {
+      html += `<button class="opcao-sim-btn" onclick="selecionarOpcao(this, '${p.replace(/'/g, "\\'")}')">${p}</button>`;
+    });
+    html += `</div>`;
+    html += `<button class="btn-regerar" onclick="simular(${index})">🔄 Gerar novas variações por IA</button>`;
+    html += `<div id="resultado-sim"></div>`;
+    container.innerHTML = html;
+  }
+
+  function selecionarOpcao(btn, valor) {
+    document.querySelectorAll('.opcao-sim-btn').forEach(b => b.classList.remove('selecionada'));
+    btn.classList.add('selecionada');
+    document.getElementById('resultado-sim').innerHTML =
+      `<div class="resultado-sim">Resposta registrada: <strong>${valor}</strong></div>`;
+  }
+
+  function renderSimulacaoConversacional(f, container) {
+    let html = `<div class="chat-box" id="chat-box">`;
+    html += `<div class="msg ia">${f.pergunta}</div>`;
+    html += `</div>`;
+    html += `<div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Digite a resposta do usuário...">
+      <button onclick="enviarRespostaChat()">Enviar</button>
+    </div>`;
+    html += `<div class="chat-fim" id="chat-fim"></div>`;
+    container.innerHTML = html;
+    window._chatTurnos = 0;
+  }
+
+  function renderSimulacaoUsabilidade(f, container) {
+    let html = `<div class="task-box"><strong>Tarefa:</strong> ${f.cenario || f.pergunta}</div>`;
+    if (f.link) {
+      html += `<p style="font-size:13px; margin-bottom:12px;">Protótipo: <a href="${f.link}" target="_blank" style="color:#003087;">${f.link}</a></p>`;
+    }
+    html += `<div class="chat-box" id="chat-box">`;
+    html += `<div class="msg ia">Por favor, execute a tarefa descrita acima e vá narrando suas impressões.</div>`;
+    html += `</div>`;
+    html += `<div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Feedback / impressões do usuário...">
+      <button onclick="enviarRespostaChat()">Enviar</button>
+    </div>`;
+    html += `<div class="chat-fim" id="chat-fim"></div>`;
+    container.innerHTML = html;
+    window._chatTurnos = 0;
+  }
+
+  function enviarRespostaChat() {
+    const input = document.getElementById('chat-input');
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    const chatBox = document.getElementById('chat-box');
+    chatBox.innerHTML += `<div class="msg user">${texto}</div>`;
+    input.value = '';
+
+    window._chatTurnos++;
+
+    if (window._chatTurnos < 3) {
+      const proxima = followUps[window._chatTurnos - 1] || followUps[followUps.length - 1];
+      chatBox.innerHTML += `<div class="msg ia">${proxima}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } else {
+      chatBox.innerHTML += `<div class="msg ia">Obrigado pelas respostas! A IA registrou e sintetizou a sessão.</div>`;
+      document.getElementById('chat-input').disabled = true;
+      document.getElementById('chat-fim').textContent = 'Sessão encerrada.';
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  }
+
+  function fecharModal() {
+    document.getElementById('modal-overlay').classList.remove('aberto');
+  }
+
+  renderLista();
+</script>
+</body>
+</html>
