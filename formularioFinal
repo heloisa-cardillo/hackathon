@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plataforma de User Research & Governança de Insights</title>
+  <style>
+    :root {
+      --primary: #003087;
+      --secondary: #ff6a00;
+      --success: #00a86b;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --discovery: #008060;
+      --bg-color: #f8f9fc;
+      --text-main: #1a1a2e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-main);
+      padding: 30px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    /* Abas do Sistema */
+    .main-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e0e0e0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #666;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.2s;
+    }
+
+    .tab-btn.ativo {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .view-content {
+      display: none;
+    }
+
+    .view-content.visivel {
+      display: block;
+    }
+
+    /* Cards de Tipos / Templates */
+    .grid-tipos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media(max-width: 650px) {
+      .grid-tipos {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-tipo {
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-tipo:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 48, 135, 0.08);
+    }
+
+    .card-tipo h3 {
+      font-size: 15px;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-tipo .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #e0e8f5;
+      color: var(--primary);
+    }
+
+    .card-tipo p {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .btn-escolher {
+      width: 100%;
+      padding: 8px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    /* Formulários e Configurações */
+    .form-container {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .header-tipo-selecionado {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .header-tipo-selecionado h2 {
+      font-size: 17px;
+      color: var(--primary);
+    }
+
+    .btn-voltar {
+      background: none;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .campo {
+      margin-bottom: 18px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    .campo textarea,
+    .campo input,
+    .campo select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .campo textarea:focus,
+    .campo input:focus,
+    .campo select:focus {
+      outline: none;
+      border-color: var(--secondary);
+    }
+
+    .campo p {
+      font-size: 14px;
+      color: #333;
+      background: #f4f6fa;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .row-dupla {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-acao {
+      width: 100%;
+      padding: 12px;
+      background: var(--secondary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-acao:hover {
+      background: #e65f00;
+    }
+
+    /* Dashboard de Formulários */
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-dashboard {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-dashboard.normal {
+      border-left: 5px solid var(--success);
+    }
+
+    .badge-status {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .badge-validado {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .meta-info {
+      font-size: 12px;
+      color: #555;
+      margin: 8px 0;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .acoes-card {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-visualizar {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-editar {
+      background: var(--warning);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-deletar {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-enviar {
+      background: var(--success);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Modais */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.aberto {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .lgpd-banner {
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #312e81;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .discovery-perguntas {
+      background: #f7faf9;
+      border: 1px solid #b7dfd0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+
+    .discovery-perguntas div {
+      font-size: 12px;
+      margin-bottom: 5px;
+      color: #444;
+    }
+
+    /* Segmentação de Envio */
+    .lista-segmentos {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .item-segmento {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .item-segmento:hover {
+      border-color: var(--primary);
+      background: #f7f9fd;
+    }
+
+    .item-segmento input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .item-segmento label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Plataforma Integrada de User Research & Governança</h1>
+
+    <div class="lgpd-banner">
+      <span>🔒 <strong>Compliance LGPD Ativo:</strong> Termos de privacidade obrigatórios integrados no fluxo do
+        Agente.</span>
+      <span>Status: Seguro</span>
+    </div>
+
+    <div class="main-tabs">
+      <button class="tab-btn ativo" onclick="mudarAba('criacao')">Templates</button>
+      <button class="tab-btn" onclick="mudarAba('dashboard')">Formulários</button>
+    </div>
+
+    <!-- ABA 1: CRIAÇÃO VIA MOTOR DE TEMPLATES -->
+    <div class="view-content visivel" id="view-criacao">
+      <div id="selecao-cards" class="grid-tipos">
+        <div class="card-tipo" onclick="prepararTemplate('qualitative')">
+          <div>
+            <h3>User Research Qualitative <span class="badge">Conversacional (IA)</span></h3>
+            <p>Coleta insights profundos por meio de diálogo interativo guiado por IA adaptativa.</p>
+          </div>
+          <button class="btn-escolher">Selecionar Template</button>
+        </div>
+
+        <div class="card-tipo" onclick="prepararTemplate('quantitative')">
+          <div>
+            <h3>User Research Quantitative <span class="badge" style="background:#fff3ea; color:#ff6a00;">Múltipla
+                Escolha (IA)</span></h3>
+            <p>Mede opções objetivas com variação inteligente de sinônimos pelo Agente.</p>
+          </div>
+          <button class="btn-escolher" style="background:#ff6a00;">Selecionar Template</button>
+        </div>
+
+        <div class="card-tipo" onclick="prepararTemplate('discovery')" style="grid-column: span 2;">
+          <div>
+            <h3>Discovery Interview <span class="badge" style="background:#e6f7f0; color:#008060;">Entrevista com
+                Roteiro guiado por IA</span></h3>
+            <p>Método fundacional com perguntas abertas e aprofundamentos dinâmicos gerados pelo Agente.</p>
+          </div>
+          <button class="btn-escolher" style="background:#008060;">Selecionar Discovery</button>
+        </div>
+      </div>
+
+      <div class="form-container" id="form-template-container" style="display: none;">
+        <div class="header-tipo-selecionado">
+          <h2 id="lbl-titulo-template">Configurar Pesquisa</h2>
+          <button class="btn-voltar" onclick="voltarSelecao()">← Escolher Outro</button>
+        </div>
+
+        <div id="form-conversacional" class="modelo-formulario">
+          <div class="campo">
+            <label for="input-pergunta">Pergunta-base</label>
+            <textarea id="input-pergunta" rows="2"
+              placeholder="Ex: Qual é a sua maior dificuldade no fluxo de pagamento?"></textarea>
+          </div>
+
+          <div class="campo">
+            <label for="input-contexto">Contexto / objetivo (opcional)</label>
+            <textarea id="input-contexto" rows="3"
+              placeholder="Explique o que essa conversa deve descobrir, para orientar a condução do diálogo."></textarea>
+          </div>
+        </div>
+
+        <div id="form-multipla" class="modelo-formulario" style="display:none;">
+          <div class="campo">
+            <label for="input-pergunta-multipla">Pergunta-base</label>
+            <textarea id="input-pergunta-multipla" rows="2" placeholder="Ex: Qual é a sua comida preferida?"></textarea>
+          </div>
+
+          <div class="campo">
+            <label>Palavras-chave das 4 alternativas</label>
+            <div class="row-dupla">
+              <input type="text" id="kw1" placeholder="Alternativa 1">
+              <input type="text" id="kw2" placeholder="Alternativa 2">
+            </div>
+
+            <div class="row-dupla" style="margin-top:10px;">
+              <input type="text" id="kw3" placeholder="Alternativa 3">
+              <input type="text" id="kw4" placeholder="Alternativa 4">
+            </div>
+
+            <div class="hint">A IA pode reformular essas palavras a cada exibição para evitar viés.</div>
+          </div>
+
+          <div class="switch-row">
+            <label class="switch" style="position:relative; width:44px; height:24px;">
+              <input type="checkbox" id="variar-ia" checked>
+              <span class="slider"></span>
+            </label>
+            <span>IA varia as palavras a cada exibição</span>
+          </div>
+        </div>
+
+        <div id="form-discovery" class="modelo-formulario" style="display:none;">
+          <div class="campo">
+            <label for="input-pergunta-discovery">Objetivo da Discovery Interview</label>
+            <textarea id="input-pergunta-discovery" rows="2"
+              placeholder="Ex: Entender como usuários realizam o acompanhamento de um pedido."></textarea>
+          </div>
+
+          <div class="campo">
+            <label for="input-perfil-discovery">Perfil / público que será entrevistado</label>
+            <input type="text" id="input-perfil-discovery"
+              placeholder="Ex: Usuários que realizaram uma compra nos últimos 30 dias.">
+          </div>
+
+          <div class="campo">
+            <label for="input-contexto-discovery">Contexto ou hipótese a investigar</label>
+            <textarea id="input-contexto-discovery" rows="3"
+              placeholder="Descreva o contexto, problema ou hipótese que a entrevista deve investigar."></textarea>
+          </div>
+
+          <div class="discovery-perguntas">
+            <div><strong>O Agente de IA irá gerar:</strong></div>
+            <div>• Pergunta inicial aberta</div>
+            <div>• Perguntas de aprofundamento conforme as respostas</div>
+            <div>• Síntese dos padrões identificados na entrevista</div>
+          </div>
+        </div>
+
+        <div class="row-dupla">
+          <div class="campo">
+            <label>Nível de Urgência Base</label>
+            <select id="select-urgencia-base">
+              <option value="Baixa">Baixa</option>
+              <option value="Média" selected>Média</option>
+              <option value="Alta">Alta</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label>Validade da Pesquisa (Dias)</label>
+            <input type="number" id="input-validade" value="30" min="1">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Controle de Acesso por Interesse (Tags de Squads)</label>
+          <input type="text" id="input-acesso" value="Checkout, Produto, UX" placeholder="Ex: Core, Growth, Checkout">
+        </div>
+
+        <button class="btn-acao" id="btn-salvar-formulario" onclick="salvarPesquisaTemplate()">Gerar Formulário
+          Determinístico</button>
+      </div>
+    </div>
+
+    <!-- ABA 2: FORMULÁRIOS CRIADOS -->
+    <div class="view-content" id="view-dashboard">
+      <div class="dash-header">
+        <h2>Formulários Criados</h2>
+        <span class="badge-status badge-validado" id="contador-insights">0 Formulário(s) Criado(s)</span>
+      </div>
+
+      <div id="lista-insights-dash"></div>
+    </div>
+  </div>
+
+  <!-- Modal de Visualização do Formulário -->
+  <div class="modal-overlay" id="modal-visualizar">
+    <div class="modal">
+      <button class="modal-close" onclick="fecharModalVisualizar()">&times;</button>
+      <h3 id="modal-titulo-visualizar">Detalhes do Formulário</h3>
+      <div id="modal-corpo-visualizar" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- Modal de Envio Segmentado -->
+  <div class="modal-overlay" id="modal-enviar">
+    <div class="modal">
+      <button class="modal-close" onclick="fecharModalEnviar()">&times;</button>
+      <h3 id="modal-titulo-enviar">Enviar Formulário</h3>
+      <p class="hint" style="margin-top:6px;">Selecione o(s) tipo(s) de cliente que devem receber este formulário.</p>
+
+      <div class="lista-segmentos">
+        <div class="item-segmento" onclick="document.getElementById('seg-60anos').click()">
+          <input type="checkbox" id="seg-60anos" value="60+ anos">
+          <label for="seg-60anos" onclick="event.stopPropagation()">60+ anos</label>
+        </div>
+        <div class="item-segmento" onclick="document.getElementById('seg-cartao').click()">
+          <input type="checkbox" id="seg-cartao" value="Com cartão de crédito">
+          <label for="seg-cartao" onclick="event.stopPropagation()">Com cartão de crédito</label>
+        </div>
+        <div class="item-segmento" onclick="document.getElementById('seg-inadimplentes').click()">
+          <input type="checkbox" id="seg-inadimplentes" value="Inadimplentes">
+          <label for="seg-inadimplentes" onclick="event.stopPropagation()">Inadimplentes</label>
+        </div>
+        <div class="item-segmento" onclick="document.getElementById('seg-novos').click()">
+          <input type="checkbox" id="seg-novos" value="Novos clientes (menos de 90 dias)">
+          <label for="seg-novos" onclick="event.stopPropagation()">Novos clientes (menos de 90 dias)</label>
+        </div>
+        <div class="item-segmento" onclick="document.getElementById('seg-frequentes').click()">
+          <input type="checkbox" id="seg-frequentes" value="Alta frequência de uso do app">
+          <label for="seg-frequentes" onclick="event.stopPropagation()">Alta frequência de uso do app</label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="input-segmento-livre">Outros critérios (opcional)</label>
+        <textarea id="input-segmento-livre" rows="2"
+          placeholder="Ex: clientes da região Sul com mais de 2 produtos ativos."></textarea>
+      </div>
+
+      <button class="btn-acao" onclick="confirmarEnvio()">Confirmar Envio</button>
+    </div>
+  </div>
+
+  <script>
+    let pesquisasCriadas = [
+      {
+        id: 1,
+        tipo: 'qualitative',
+        pergunta: 'Dificuldades no uso do Pix',
+        urgenciaBase: 'Alta',
+        validadeDias: 15,
+        dataCriacao: new Date(),
+        acesso: 'Checkout',
+        contexto: 'Entender as principais dificuldades dos usuários durante o uso do Pix.'
+      }
+    ];
+
+    let tipoAtual = '';
+    let idEmEdicao = null;
+    let idEmEnvio = null;
+
+    function mudarAba(aba) {
+      document.querySelectorAll('.view-content').forEach(el => el.classList.remove('visivel'));
+      document.querySelectorAll('.main-tabs button').forEach(el => el.classList.remove('ativo'));
+
+      if (aba === 'criacao') {
+        document.getElementById('view-criacao').classList.add('visivel');
+        document.querySelectorAll('.main-tabs button')[0].classList.add('ativo');
+      } else if (aba === 'dashboard') {
+        document.getElementById('view-dashboard').classList.add('visivel');
+        document.querySelectorAll('.main-tabs button')[1].classList.add('ativo');
+        renderizarDashboard();
+      }
+    }
+
+    function prepararTemplate(tipo, dadosExistentes = null) {
+      tipoAtual = tipo;
+
+      document.getElementById('selecao-cards').style.display = 'none';
+      document.getElementById('form-template-container').style.display = 'block';
+
+      const titulos = {
+        qualitative: 'Template: Conversacional',
+        quantitative: 'Template: Múltipla Escolha',
+        discovery: 'Template: Discovery Interview'
+      };
+
+      document.getElementById('lbl-titulo-template').textContent =
+        idEmEdicao !== null ? `Editando: ${titulos[tipo]}` : titulos[tipo];
+
+      document.getElementById('btn-salvar-formulario').textContent =
+        idEmEdicao !== null ? 'Salvar Alterações' : 'Gerar Formulário Determinístico';
+
+      document.querySelectorAll('.modelo-formulario').forEach(el => el.style.display = 'none');
+
+      document.getElementById(
+        `form-${tipo === 'qualitative'
+          ? 'conversacional'
+          : tipo === 'quantitative'
+            ? 'multipla'
+            : 'discovery'}`
+      ).style.display = 'block';
+
+      if (dadosExistentes) {
+        document.getElementById('select-urgencia-base').value = dadosExistentes.urgenciaBase;
+        document.getElementById('input-validade').value = dadosExistentes.validadeDias;
+        document.getElementById('input-acesso').value = dadosExistentes.acesso;
+
+        if (tipo === 'qualitative') {
+          document.getElementById('input-pergunta').value = dadosExistentes.pergunta;
+          document.getElementById('input-contexto').value = dadosExistentes.contexto || '';
+        }
+
+        if (tipo === 'quantitative') {
+          document.getElementById('input-pergunta-multipla').value = dadosExistentes.pergunta;
+          document.getElementById('kw1').value = dadosExistentes.palavrasChave[0];
+          document.getElementById('kw2').value = dadosExistentes.palavrasChave[1];
+          document.getElementById('kw3').value = dadosExistentes.palavrasChave[2];
+          document.getElementById('kw4').value = dadosExistentes.palavrasChave[3];
+          document.getElementById('variar-ia').checked = dadosExistentes.variarIA;
+        }
+
+        if (tipo === 'discovery') {
+          document.getElementById('input-pergunta-discovery').value = dadosExistentes.pergunta;
+          document.getElementById('input-perfil-discovery').value = dadosExistentes.perfil || '';
+          document.getElementById('input-contexto-discovery').value = dadosExistentes.contexto || '';
+        }
+      }
+    }
+
+    function voltarSelecao() {
+      document.getElementById('selecao-cards').style.display = 'grid';
+      document.getElementById('form-template-container').style.display = 'none';
+      idEmEdicao = null;
+      limparFormularioCriacao();
+    }
+
+    function salvarPesquisaTemplate() {
+      let pergunta = '';
+
+      if (tipoAtual === 'qualitative') {
+        pergunta = document.getElementById('input-pergunta').value.trim();
+      }
+
+      if (tipoAtual === 'quantitative') {
+        pergunta = document.getElementById('input-pergunta-multipla').value.trim();
+      }
+
+      if (tipoAtual === 'discovery') {
+        pergunta = document.getElementById('input-pergunta-discovery').value.trim();
+      }
+
+      if (!pergunta) {
+        alert('Preencha a pergunta-base ou objetivo da pesquisa.');
+        return;
+      }
+
+      const dadosFormulario = {
+        tipo: tipoAtual,
+        pergunta: pergunta,
+        urgenciaBase: document.getElementById('select-urgencia-base').value,
+        validadeDias: parseInt(document.getElementById('input-validade').value) || 30,
+        acesso: document.getElementById('input-acesso').value
+      };
+
+      if (tipoAtual === 'qualitative') {
+        dadosFormulario.contexto = document.getElementById('input-contexto').value.trim();
+      }
+
+      if (tipoAtual === 'quantitative') {
+        dadosFormulario.palavrasChave = [
+          document.getElementById('kw1').value.trim(),
+          document.getElementById('kw2').value.trim(),
+          document.getElementById('kw3').value.trim(),
+          document.getElementById('kw4').value.trim()
+        ];
+
+        if (dadosFormulario.palavrasChave.some(k => !k)) {
+          alert('Preencha as 4 alternativas.');
+          return;
+        }
+
+        dadosFormulario.variarIA = document.getElementById('variar-ia').checked;
+      }
+
+      if (tipoAtual === 'discovery') {
+        dadosFormulario.perfil = document.getElementById('input-perfil-discovery').value.trim();
+        dadosFormulario.contexto = document.getElementById('input-contexto-discovery').value.trim();
+      }
+
+      if (idEmEdicao !== null) {
+        const index = pesquisasCriadas.findIndex(p => p.id === idEmEdicao);
+        if (index !== -1) {
+          pesquisasCriadas[index] = { ...pesquisasCriadas[index], ...dadosFormulario };
+        }
+        alert('Formulário atualizado com sucesso!');
+        idEmEdicao = null;
+      } else {
+        pesquisasCriadas.push({
+          id: Date.now(),
+          dataCriacao: new Date(),
+          ...dadosFormulario
+        });
+        alert('Formulário criado com sucesso!');
+      }
+
+      limparFormularioCriacao();
+      voltarSelecao();
+      mudarAba('dashboard');
+    }
+
+    function limparFormularioCriacao() {
+      document.getElementById('input-pergunta').value = '';
+      document.getElementById('input-contexto').value = '';
+      document.getElementById('input-pergunta-multipla').value = '';
+      document.getElementById('input-pergunta-discovery').value = '';
+      document.getElementById('input-perfil-discovery').value = '';
+      document.getElementById('input-contexto-discovery').value = '';
+
+      ['kw1', 'kw2', 'kw3', 'kw4'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+    }
+
+    function renderizarDashboard() {
+      const container = document.getElementById('lista-insights-dash');
+      container.innerHTML = '';
+
+      document.getElementById('contador-insights').textContent =
+        `${pesquisasCriadas.length} Formulário(s) Criado(s)`;
+
+      if (pesquisasCriadas.length === 0) {
+        container.innerHTML = `
+        <div class="card-dashboard">
+          <p>Nenhum formulário criado ainda.</p>
+        </div>
+      `;
+        return;
+      }
+
+      pesquisasCriadas.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card-dashboard normal';
+
+        const tipoPesquisa =
+          p.tipo === 'qualitative'
+            ? 'Conversacional'
+            : p.tipo === 'quantitative'
+              ? 'Múltipla Escolha'
+              : 'Discovery Interview';
+
+        card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+          <h3>${p.pergunta}</h3>
+          <span class="badge-status badge-validado">${tipoPesquisa}</span>
+        </div>
+
+        <div class="meta-info">
+          <span>📊 Tipo: <strong>${tipoPesquisa}</strong></span>
+          <span>📅 Criado em: ${p.dataCriacao.toLocaleDateString('pt-BR')}</span>
+          <span>🔒 Acesso: ${p.acesso}</span>
+        </div>
+
+        <div class="acoes-card">
+          <button class="btn-visualizar" onclick="visualizarFormulario(${p.id})">👁 Visualizar</button>
+          <button class="btn-editar" onclick="editarFormulario(${p.id})">✏️ Editar</button>
+          <button class="btn-enviar" onclick="abrirModalEnviar(${p.id})">📤 Enviar</button>
+          <button class="btn-deletar" onclick="deletarFormulario(${p.id})">🗑 Deletar</button>
+        </div>
+      `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function visualizarFormulario(id) {
+      const p = pesquisasCriadas.find(item => item.id === id);
+      if (!p) return;
+
+      const tipoPesquisa =
+        p.tipo === 'qualitative'
+          ? 'Conversacional'
+          : p.tipo === 'quantitative'
+            ? 'Múltipla Escolha'
+            : 'Discovery Interview';
+
+      document.getElementById('modal-titulo-visualizar').textContent = `${tipoPesquisa} — ${p.pergunta}`;
+
+      let camposHtml = '';
+
+      if (p.tipo === 'qualitative') {
+        camposHtml += `
+        <div class="campo"><label>Pergunta-base</label><p>${p.pergunta}</p></div>
+        <div class="campo"><label>Contexto / objetivo</label><p>${p.contexto || '—'}</p></div>
+      `;
+      }
+
+      if (p.tipo === 'quantitative') {
+        camposHtml += `
+        <div class="campo"><label>Pergunta-base</label><p>${p.pergunta}</p></div>
+        <div class="campo"><label>Alternativas</label><p>${p.palavrasChave.join(', ')}</p></div>
+        <div class="campo"><label>IA varia as palavras a cada exibição</label><p>${p.variarIA ? 'Sim' : 'Não'}</p></div>
+      `;
+      }
+
+      if (p.tipo === 'discovery') {
+        camposHtml += `
+        <div class="campo"><label>Objetivo</label><p>${p.pergunta}</p></div>
+        <div class="campo"><label>Perfil / público</label><p>${p.perfil || '—'}</p></div>
+        <div class="campo"><label>Contexto / hipótese</label><p>${p.contexto || '—'}</p></div>
+      `;
+      }
+
+      camposHtml += `
+      <div class="row-dupla">
+        <div class="campo"><label>Urgência Base</label><p>${p.urgenciaBase}</p></div>
+        <div class="campo"><label>Validade (dias)</label><p>${p.validadeDias}</p></div>
+      </div>
+      <div class="campo"><label>Acesso (Squads)</label><p>${p.acesso}</p></div>
+      <div class="campo"><label>Criado em</label><p>${p.dataCriacao.toLocaleDateString('pt-BR')}</p></div>
+    `;
+
+      document.getElementById('modal-corpo-visualizar').innerHTML = camposHtml;
+      document.getElementById('modal-visualizar').classList.add('aberto');
+    }
+
+    function fecharModalVisualizar() {
+      document.getElementById('modal-visualizar').classList.remove('aberto');
+    }
+
+    function editarFormulario(id) {
+      const p = pesquisasCriadas.find(item => item.id === id);
+      if (!p) return;
+
+      idEmEdicao = id;
+      mudarAba('criacao');
+      prepararTemplate(p.tipo, p);
+    }
+
+    function deletarFormulario(id) {
+      const p = pesquisasCriadas.find(item => item.id === id);
+      if (!p) return;
+
+      const confirmar = confirm(`Deseja realmente deletar o formulário "${p.pergunta}"?`);
+
+      if (confirmar) {
+        pesquisasCriadas = pesquisasCriadas.filter(item => item.id !== id);
+        renderizarDashboard();
+      }
+    }
+
+    function abrirModalEnviar(id) {
+      const p = pesquisasCriadas.find(item => item.id === id);
+      if (!p) return;
+
+      idEmEnvio = id;
+
+      document.getElementById('modal-titulo-enviar').textContent = `Enviar: ${p.pergunta}`;
+
+      document.querySelectorAll('#modal-enviar input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById('input-segmento-livre').value = '';
+
+      document.getElementById('modal-enviar').classList.add('aberto');
+    }
+
+    function fecharModalEnviar() {
+      document.getElementById('modal-enviar').classList.remove('aberto');
+      idEmEnvio = null;
+    }
+
+    function confirmarEnvio() {
+      const p = pesquisasCriadas.find(item => item.id === idEmEnvio);
+      if (!p) return;
+
+      const segmentosSelecionados = Array.from(
+        document.querySelectorAll('#modal-enviar input[type="checkbox"]:checked')
+      ).map(cb => cb.value);
+
+      const outros = document.getElementById('input-segmento-livre').value.trim();
+      if (outros) {
+        segmentosSelecionados.push(outros);
+      }
+
+      if (segmentosSelecionados.length === 0) {
+        alert('Selecione ao menos um público-alvo ou descreva um critério.');
+        return;
+      }
+
+      alert(`Formulário "${p.pergunta}" enviado para: ${segmentosSelecionados.join(', ')}.`);
+
+      fecharModalEnviar();
+    }
+
+    window.onload = () => {
+      renderizarDashboard();
+    };
+  </script>
+</body>
+
+</html>
