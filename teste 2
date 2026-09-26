@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma de User Research & Governança de Insights</title>
+<style>
+  :root {
+    --primary: #003087;
+    --secondary: #ff6a00;
+    --success: #00a86b;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --discovery: #008060;
+    --bg-color: #f8f9fc;
+    --text-main: #1a1a2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: var(--bg-color); color: var(--text-main); padding: 30px 20px; display: flex; justify-content: center; }
+  .container { width: 100%; max-width: 950px; }
+  h1 { font-size: 22px; margin-bottom: 20px; color: var(--primary); text-align: center; }
+
+  /* Abas do Sistema */
+  .main-tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #e0e0e0; overflow-x: auto; }
+  .tab-btn {
+    padding: 12px 18px; font-size: 14px; font-weight: 700; background: none; border: none;
+    border-bottom: 3px solid transparent; color: #666; cursor: pointer; white-space: nowrap; transition: 0.2s;
+  }
+  .tab-btn.ativo { color: var(--primary); border-bottom-color: var(--primary); }
+
+  .view-content { display: none; }
+  .view-content.visivel { display: block; }
+
+  /* Cards de Tipos / Templates */
+  .grid-tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media(max-width: 650px) { .grid-tipos { grid-template-columns: 1fr; } }
+  
+  .card-tipo {
+    background: #fff; border: 2px solid #e0e0e0; border-radius: 10px; padding: 18px;
+    cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .card-tipo:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,48,135,0.08); }
+  .card-tipo h3 { font-size: 15px; color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .card-tipo .badge { font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #e0e8f5; color: var(--primary); }
+  .card-tipo p { font-size: 13px; color: #444; line-height: 1.4; margin-bottom: 12px; }
+  .btn-escolher {
+    width: 100%; padding: 8px; background: var(--primary); color: #fff;
+    border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center;
+  }
+
+  /* Formulários e Configurações */
+  .form-container { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .header-tipo-selecionado { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 20px; border-bottom: 1px solid #eee; }
+  .header-tipo-selecionado h2 { font-size: 17px; color: var(--primary); }
+  .btn-voltar { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+  .campo { margin-bottom: 18px; }
+  .campo label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #333; }
+  .campo textarea, .campo input, .campo select {
+    width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
+  }
+  .campo textarea:focus, .campo input:focus, .campo select:focus { outline: none; border-color: var(--secondary); }
+  .hint { font-size: 11px; color: #777; margin-top: 4px; }
+
+  .row-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .btn-acao {
+    width: 100%; padding: 12px; background: var(--secondary); color: #fff; border: none;
+    border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+  }
+  .btn-acao:hover { background: #e65f00; }
+
+  /* Dashboard da Squad & Governança */
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .card-dashboard {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .card-dashboard.urgente { border-left: 5px solid var(--danger); background: #fef2f2; }
+  .card-dashboard.atencao { border-left: 5px solid var(--warning); }
+  .card-dashboard.normal { border-left: 5px solid var(--success); }
+
+  .badge-status { font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 700; display: inline-block; }
+  .badge-sugestao { background: #e0e8f5; color: var(--primary); }
+  .badge-validado { background: #d1fae5; color: #065f46; }
+  .badge-conflito { background: #fee2e2; color: #991b1b; }
+
+  .meta-info { font-size: 12px; color: #555; margin: 8px 0; display: flex; gap: 15px; flex-wrap: wrap; }
+  .trecho-citacao { font-style: italic; background: #f4f6fa; padding: 8px 12px; border-left: 3px solid var(--primary); margin: 8px 0; font-size: 13px; }
+
+  .acoes-card { display: flex; gap: 10px; margin-top: 12px; }
+  .btn-aprovar { background: var(--success); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+  .btn-resolver { background: var(--danger); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+  .btn-simular-card { background: var(--primary); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+
+  /* Modal de Simulação com Agente */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
+  .modal-overlay.aberto { display: flex; }
+  .modal { background: #fff; border-radius: 10px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 24px; position: relative; }
+  .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: #999; }
+  
+  .chat-box { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; max-height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 6px; background: #fafafa; }
+  .msg { padding: 10px 12px; border-radius: 10px; font-size: 13px; max-width: 85%; line-height: 1.4; }
+  .msg.ia { background: #eef2ff; color: #1e3a8a; align-self: flex-start; }
+  .msg.user { background: var(--secondary); color: #fff; align-self: flex-end; }
+  
+  .opcoes-quant { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
+  .btn-opcao-quant { padding: 10px; border: 2px solid var(--primary); background: #fff; color: var(--primary); border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; }
+  .btn-opcao-quant:hover { background: #eef2ff; }
+
+  .lgpd-banner { background: #eef2ff; border: 1px solid #c7d2fe; padding: 10px 14px; border-radius: 6px; font-size: 12px; color: #312e81; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+
+  /* Agente de IA dentro dos formulários */
+  .agente-formulario {
+    background: #f0f4fa; border: 1px solid #c7d2fe; border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 18px;
+  }
+  .agente-formulario strong { color: var(--primary); font-size: 13px; }
+  .agente-formulario p { font-size: 12px; color: #444; margin-top: 4px; line-height: 1.4; }
+  .campo-agente { margin-top: 12px; }
+  .campo-agente textarea, .campo-agente input {
+    width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px;
+  }
+  .resposta-agente {
+    margin-top: 8px; padding: 8px 10px; background: #fff; border-left: 3px solid var(--primary);
+    border-radius: 4px; font-size: 12px; color: #333; display: none;
+  }
+  .discovery-perguntas {
+    background: #f7faf9; border: 1px solid #b7dfd0; border-radius: 6px;
+    padding: 10px 12px; margin-top: 10px;
+  }
+  .discovery-perguntas div { font-size: 12px; margin-bottom: 5px; color: #444; }
+
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Plataforma Integrada de User Research & Governança</h1>
+
+  <div class="lgpd-banner">
+    <span>🔒 <strong>Compliance LGPD Ativo:</strong> Termos de privacidade obrigatórios integrados no fluxo do Agente.</span>
+    <span>Status: Seguro</span>
+  </div>
+
+  <div class="main-tabs">
+    <button class="tab-btn ativo" onclick="mudarAba('criacao')">1. Squad Define Objetivo (Templates)</button>
+    <button class="tab-btn" onclick="mudarAba('dashboard')">2. Respostas dos Formulários</button>
+  </div>
+
+  <!-- ABA 1: CRIAÇÃO VIA MOTOR DE TEMPLATES -->
+  <div class="view-content visivel" id="view-criacao">
+    <div id="selecao-cards" class="grid-tipos">
+      <div class="card-tipo" onclick="prepararTemplate('qualitative')">
+        <div>
+          <h3>User Research Qualitative <span class="badge">Conversacional (IA)</span></h3>
+          <p>Coleta insights profundos por meio de diálogo interativo guiado por IA adaptativa.</p>
+        </div>
+        <button class="btn-escolher">Selecionar Template</button>
+      </div>
+      <div class="card-tipo" onclick="prepararTemplate('quantitative')">
+        <div>
+          <h3>User Research Quantitative <span class="badge" style="background:#fff3ea; color:#ff6a00;">Múltipla Escolha (IA)</span></h3>
+          <p>Mede opções objetivas com variação inteligente de sinônimos pelo Agente.</p>
+        </div>
+        <button class="btn-escolher" style="background:#ff6a00;">Selecionar Template</button>
+      </div>
+      <div class="card-tipo" onclick="prepararTemplate('discovery')" style="grid-column: span 2;">
+        <div>
+          <h3>Discovery Interview <span class="badge" style="background:#e6f7f0; color:#008060;">Entrevista com Roteiro guiado por IA</span></h3>
+          <p>Método fundacional com perguntas abertas e aprofundamentos dinâmicos gerados pelo Agente.</p>
+        </div>
+        <button class="btn-escolher" style="background:#008060;">Selecionar Discovery</button>
+      </div>
+    </div>
+
+    <div class="form-container" id="form-template-container" style="display: none;">
+      <div class="header-tipo-selecionado">
+        <h2 id="lbl-titulo-template">Configurar Pesquisa</h2>
+        <button class="btn-voltar" onclick="voltarSelecao()">← Escolher Outro</button>
+      </div>
+
+      <div class="agente-formulario">
+        <strong>🤖 Agente de IA do formulário</strong>
+        <p id="texto-agente-formulario">O Agente ajuda a estruturar o preenchimento da pesquisa de acordo com o modelo selecionado.</p>
+        <div class="campo-agente">
+          <input type="text" id="input-comando-agente" placeholder="Peça ao Agente para ajudar a estruturar sua pesquisa...">
+          <button class="btn-simular-card" style="margin-top:8px;" onclick="acionarAgenteFormulario()">Enviar ao Agente</button>
+          <div id="resposta-agente-formulario" class="resposta-agente"></div>
+        </div>
+      </div>
+
+      <div id="form-conversacional" class="modelo-formulario">
+        <div class="campo">
+          <label for="input-pergunta">Pergunta-base</label>
+          <textarea id="input-pergunta" rows="2" placeholder="Ex: Qual é a sua maior dificuldade no fluxo de pagamento?"></textarea>
+        </div>
+        <div class="campo">
+          <label for="input-contexto">Contexto / objetivo (opcional)</label>
+          <textarea id="input-contexto" rows="3" placeholder="Explique para a IA o que essa conversa deve descobrir, para guiar a condução do diálogo."></textarea>
+        </div>
+      </div>
+
+      <div id="form-multipla" class="modelo-formulario" style="display:none;">
+        <div class="campo">
+          <label for="input-pergunta-multipla">Pergunta-base</label>
+          <textarea id="input-pergunta-multipla" rows="2" placeholder="Ex: Qual é a sua comida preferida?"></textarea>
+        </div>
+        <div class="campo">
+          <label>Palavras-chave das 4 alternativas</label>
+          <div class="row-dupla">
+            <input type="text" id="kw1" placeholder="Alternativa 1">
+            <input type="text" id="kw2" placeholder="Alternativa 2">
+          </div>
+          <div class="row-dupla" style="margin-top:10px;">
+            <input type="text" id="kw3" placeholder="Alternativa 3">
+            <input type="text" id="kw4" placeholder="Alternativa 4">
+          </div>
+          <div class="hint">A IA vai reformular essas palavras a cada geração para evitar viés.</div>
+        </div>
+        <div class="switch-row">
+          <label class="switch" style="position:relative; width:44px; height:24px;">
+            <input type="checkbox" id="variar-ia" checked>
+            <span class="slider"></span>
+          </label>
+          <span>IA varia as palavras a cada exibição</span>
+        </div>
+      </div>
+
+      <div id="form-discovery" class="modelo-formulario" style="display:none;">
+        <div class="campo">
+          <label for="input-pergunta-discovery">Objetivo da Discovery Interview</label>
+          <textarea id="input-pergunta-discovery" rows="2" placeholder="Ex: Entender como usuários realizam o acompanhamento de um pedido."></textarea>
+        </div>
+        <div class="campo">
+          <label for="input-perfil-discovery">Perfil / público que será entrevistado</label>
+          <input type="text" id="input-perfil-discovery" placeholder="Ex: Usuários que realizaram uma compra nos últimos 30 dias.">
+        </div>
+        <div class="campo">
+          <label for="input-contexto-discovery">Contexto ou hipótese a investigar</label>
+          <textarea id="input-contexto-discovery" rows="3" placeholder="Descreva o contexto, problema ou hipótese que a entrevista deve investigar."></textarea>
+        </div>
+        <div class="discovery-perguntas">
+          <div><strong>O Agente de IA irá gerar:</strong></div>
+          <div>• Pergunta inicial aberta</div>
+          <div>• Perguntas de aprofundamento conforme as respostas</div>
+          <div>• Síntese dos padrões identificados na entrevista</div>
+        </div>
+      </div>
+
+      <div class="row-dupla">
+        <div class="campo">
+          <label>Nível de Urgência Base</label>
+          <select id="select-urgencia-base">
+            <option value="Baixa">Baixa</option>
+            <option value="Média" selected>Média</option>
+            <option value="Alta">Alta</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Validade da Pesquisa (Dias)</label>
+          <input type="number" id="input-validade" value="30" min="1">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Controle de Acesso por Interesse (Tags de Squads)</label>
+        <input type="text" id="input-acesso" value="Checkout, Produto, UX" placeholder="Ex: Core, Growth, Checkout">
+      </div>
+
+      <button class="btn-acao" onclick="salvarPesquisaTemplate()">Gerar Formulário Determinístico</button>
+    </div>
+  </div>
+
+  <!-- ABA 2: RESPOSTAS DOS FORMULÁRIOS
+  <div class="view-content" id="view-dashboard">
+    <div class="dash-header">
+      <h2>Respostas dos Formulários</h2>
+      <span class="badge-status badge-validado" id="contador-insights">0 Respostas Registradas</span>
+    </div>
+    <div id="lista-insights-dash"></div>
+  </div>
+</div> -->
+
+<!-- function renderizarDashboard() {
+  const container = document.getElementById('lista-insights-dash');
+
+  container.innerHTML = `
+    <div class="card-dashboard">
+      <p>Nenhuma resposta registrada ainda.</p>
+    </div>
+  `;
+} -->
+
+<!-- Modal de Execução Interna com o Agente por Tipo -->
+<div class="modal-overlay" id="modal-simulacao">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModalSimulacao()">&times;</button>
+    <h3 id="modal-titulo-pesquisa">Execução da Pesquisa com Agente</h3>
+    <div id="modal-corpo-conteudo"></div>
+  </div>
+</div>
+
+<script>
+  let pesquisasCriadas = [
+    {
+      id: 1,
+      tipo: 'qualitative',
+      pergunta: 'Dificuldades no uso do Pix',
+      urgenciaBase: 'Alta',
+      validadeDias: 15,
+      dataCriacao: new Date(),
+      acesso: 'Checkout',
+      respostasTotal: 12,
+      doresCount: 4,
+      insight: 'Usuários sentem insegurança devido à demora na atualização do comprovante.',
+      sentimento: 'Frustração',
+      trecho: 'Fiquei sem saber se o pagamento realmente foi concluído.',
+      statusDesigner: 'Sugestão da IA',
+      temConflito: true
+    }
+  ];
+
+  function mudarAba(aba) {
+    document.querySelectorAll('.view-content').forEach(el => el.classList.remove('visivel'));
+    document.querySelectorAll('.main-tabs button').forEach(el => el.classList.remove('ativo'));
+    
+    if(aba === 'criacao') {
+      document.getElementById('view-criacao').classList.add('visivel');
+      document.querySelectorAll('.main-tabs button')[0].classList.add('ativo');
+    } else if(aba === 'dashboard') {
+      document.getElementById('view-dashboard').classList.add('visivel');
+      document.querySelectorAll('.main-tabs button')[1].classList.add('ativo');
+      renderizarDashboard();
+    }
+  }
+
+  let tipoAtual = '';
+  function prepararTemplate(tipo) {
+    tipoAtual = tipo;
+    document.getElementById('selecao-cards').style.display = 'none';
+    document.getElementById('form-template-container').style.display = 'block';
+
+    const titulos = {
+      'qualitative': 'Template: Conversacional',
+      'quantitative': 'Template: Múltipla Escolha',
+      'discovery': 'Template: Discovery Interview'
+    };
+
+    const textosAgente = {
+      'qualitative': 'O Agente conduz uma conversa natural e ajuda a estruturar a pergunta-base e o contexto da pesquisa.',
+      'quantitative': 'O Agente ajuda a estruturar a pergunta e reformula as alternativas para reduzir vícios de formulação.',
+      'discovery': 'O Agente ajuda a transformar o objetivo da pesquisa em um roteiro de entrevista com perguntas abertas e aprofundamentos.'
+    };
+
+    document.getElementById('lbl-titulo-template').textContent = titulos[tipo];
+    document.getElementById('texto-agente-formulario').textContent = textosAgente[tipo];
+
+    document.querySelectorAll('.modelo-formulario').forEach(el => el.style.display = 'none');
+    document.getElementById(`form-${tipo === 'qualitative' ? 'conversacional' : tipo === 'quantitative' ? 'multipla' : 'discovery'}`).style.display = 'block';
+    document.getElementById('resposta-agente-formulario').style.display = 'none';
+    document.getElementById('input-comando-agente').value = '';
+  }
+
+  function acionarAgenteFormulario() {
+    const comando = document.getElementById('input-comando-agente').value.trim();
+    const resposta = document.getElementById('resposta-agente-formulario');
+    if(!comando) return;
+
+    const respostas = {
+      qualitative: 'O Agente sugere uma pergunta aberta, sem induzir a resposta, e orienta o contexto para aprofundar a experiência do usuário.',
+      quantitative: 'O Agente sugere alternativas claras e equivalentes e pode reformular as palavras-chave para reduzir vieses de formulação.',
+      discovery: 'O Agente sugere começar pelo comportamento real do usuário e aprofundar com perguntas abertas, evitando validar a hipótese diretamente.'
+    };
+
+    resposta.textContent = respostas[tipoAtual];
+    resposta.style.display = 'block';
+  }
+
+  function voltarSelecao() {
+    document.getElementById('selecao-cards').style.display = 'grid';
+    document.getElementById('form-template-container').style.display = 'none';
+  }
+
+  function salvarPesquisaTemplate() {
+    let pergunta = '';
+    if(tipoAtual === 'qualitative') pergunta = document.getElementById('input-pergunta').value.trim();
+    if(tipoAtual === 'quantitative') pergunta = document.getElementById('input-pergunta-multipla').value.trim();
+    if(tipoAtual === 'discovery') pergunta = document.getElementById('input-pergunta-discovery').value.trim();
+
+    if(!pergunta) {
+      alert('Preencha a pergunta-base ou objetivo da pesquisa.');
+      return;
+    }
+
+    const novaPesquisa = {
+      id: Date.now(),
+      tipo: tipoAtual,
+      pergunta: pergunta,
+      urgenciaBase: document.getElementById('select-urgencia-base').value,
+      validadeDias: parseInt(document.getElementById('input-validade').value) || 30,
+      dataCriacao: new Date(),
+      acesso: document.getElementById('input-acesso').value,
+      respostasTotal: 1,
+      doresCount: 0,
+      insight: 'Aguardando interações com o agente...',
+      sentimento: 'Neutro',
+      trecho: 'Nenhum trecho coletado.',
+      statusDesigner: 'Sugestão da IA',
+      temConflito: false
+    };
+
+    if(tipoAtual === 'qualitative') {
+      novaPesquisa.contexto = document.getElementById('input-contexto').value.trim();
+    }
+
+    if(tipoAtual === 'quantitative') {
+      novaPesquisa.palavrasChave = [
+        document.getElementById('kw1').value.trim(),
+        document.getElementById('kw2').value.trim(),
+        document.getElementById('kw3').value.trim(),
+        document.getElementById('kw4').value.trim()
+      ];
+      if(novaPesquisa.palavrasChave.some(k => !k)) {
+        alert('Preencha as 4 alternativas.');
+        return;
+      }
+      novaPesquisa.variarIA = document.getElementById('variar-ia').checked;
+    }
+
+    if(tipoAtual === 'discovery') {
+      novaPesquisa.perfil = document.getElementById('input-perfil-discovery').value.trim();
+      novaPesquisa.contexto = document.getElementById('input-contexto-discovery').value.trim();
+    }
+
+    pesquisasCriadas.push(novaPesquisa);
+    alert('Formulário gerado com sucesso via Agente de IA!');
+    voltarSelecao();
+    mudarAba('dashboard');
+  }
+
+  function renderizarDashboard() {
+    const container = document.getElementById('lista-insights-dash');
+    container.innerHTML = '';
+
+    let totalRespostas = pesquisasCriadas.reduce((total, p) => {
+      return total + Math.max(0, p.respostasTotal - 1);
+    }, 0);
+
+    document.getElementById('contador-insights').textContent =
+      `${totalRespostas} Respostas Registradas`;
+
+    pesquisasCriadas.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card-dashboard normal';
+
+      const tipoPesquisa =
+        p.tipo === 'qualitative'
+          ? 'Conversacional'
+          : p.tipo === 'quantitative'
+          ? 'Múltipla Escolha'
+          : 'Discovery Interview';
+
+      const temResposta = p.trecho && p.trecho !== 'Nenhum trecho coletado.';
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <h3>${p.pergunta}</h3>
+          <span class="badge-status badge-validado">${tipoPesquisa}</span>
+        </div>
+
+        <div class="meta-info">
+          <span>📊 Tipo: <strong>${tipoPesquisa}</strong></span>
+          <span>👥 Respostas: <strong>${Math.max(0, p.respostasTotal - 1)}</strong></span>
+          <span>🔒 Acesso: ${p.acesso}</span>
+        </div>
+
+        <p><strong>Resposta registrada:</strong></p>
+
+        <div class="trecho-citacao">
+          ${temResposta ? `"${p.trecho}"` : 'Nenhuma resposta registrada ainda.'}
+          ${temResposta ? ` (Sentimento: <strong>${p.sentimento}</strong>)` : ''}
+        </div>
+
+        <div class="acoes-card">
+          <button class="btn-simular-card" onclick="iniciarExecucaoAgente(${p.id})">
+            🤖 Responder Formulário
+          </button>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+  }
+
+  // Lógica Interna baseada no tipo de pesquisa acionando o Agente
+  function iniciarExecucaoAgente(id) {
+    const p = pesquisasCriadas.find(item => item.id === id);
+    document.getElementById('modal-titulo-pesquisa').textContent = `Agente IA em Ação — [${p.tipo.toUpperCase()}]`;
+    const corpo = document.getElementById('modal-corpo-conteudo');
+
+    if(p.tipo === 'qualitative') {
+      // Estilo Qualitativo Conversacional
+      corpo.innerHTML = `
+        <p class="hint">O Agente conduzirá um diálogo natural adaptando as perguntas ao contexto.</p>
+        <div class="chat-box" id="chat-agente">
+          <div class="msg ia">Olá! Estou conduzindo esta pesquisa sobre: "<strong>${p.pergunta}</strong>". Como tem sido sua experiência com isso recentemente?</div>
+        </div>
+        <div class="row-dupla" style="margin-top:10px;">
+          <input type="text" id="input-msg-usuario" placeholder="Digite sua resposta...">
+          <button class="btn-acao" style="margin-top:0;" onclick="enviarChatQualitativo(${p.id})">Enviar ao Agente</button>
+        </div>
+      `;
+    } else if(p.tipo === 'quantitative') {
+      // Estilo Quantitativo com variação de sinônimos por IA
+      const sinonimosGerados = ['Lentidão no sistema', 'Demora no processamento', 'Travamento na tela', 'Falha de resposta'];
+      corpo.innerHTML = `
+        <p class="hint">O Agente reescreveu dinamicamente as alternativas para evitar vícios de formulação:</p>
+        <p style="font-weight:600; margin: 10px 0;">${p.pergunta}</p>
+        <div class="opcoes-quant">
+          ${sinonimosGerados.map(opt => `<button class="btn-opcao-quant" onclick="responderQuantitativo(${p.id}, '${opt}')">${opt}</button>`).join('')}
+        </div>
+        <div id="status-quant" style="font-size:13px; color:var(--success); margin-top:10px;"></div>
+      `;
+    } else if(p.tipo === 'discovery') {
+      // Estilo Discovery Interview com perguntas abertas e aprofundamento por IA
+      corpo.innerHTML = `
+        <p class="hint">Entrevista de Descoberta — O Agente conduz o roteiro a partir do objetivo configurado e aprofunda conforme a resposta.</p>
+        <div class="chat-box" id="chat-discovery">
+          <div class="msg ia"><strong>Agente de IA:</strong> Para investigarmos "${p.pergunta}", conte-me como foi a última vez que você passou por essa situação.</div>
+        </div>
+        <div class="row-dupla" style="margin-top:10px;">
+          <input type="text" id="input-disc-usuario" placeholder="Descreva seu comportamento...">
+          <button class="btn-acao" style="margin-top:0;" onclick="enviarDiscovery(${p.id})">Responder</button>
+        </div>
+      `;
+    }
+
+    document.getElementById('modal-simulacao').classList.add('aberto');
+  }
+
+  function enviarChatQualitativo(id) {
+    const input = document.getElementById('input-msg-usuario');
+    const texto = input.value.trim();
+    if(!texto) return;
+
+    const chat = document.getElementById('chat-agente');
+    chat.innerHTML += `<div class="msg user">${texto}</div>`;
+    input.value = '';
+
+    setTimeout(() => {
+      chat.innerHTML += `<div class="msg ia">Entendi perfeitamente. O Agente registrou esse ponto como frustração e sintetizou no dashboard.</div>`;
+      chat.scrollTop = chat.scrollHeight;
+      atualizarDadosPesquisa(id, texto, 'Frustração', true);
+    }, 600);
+  }
+
+  function responderQuantitativo(id, opcaoEscolhida) {
+    document.getElementById('status-quant').textContent = `✔ Resposta registrada pelo Agente: "${opcaoEscolhida}". Dashboard atualizado!`;
+    atualizarDadosPesquisa(id, `Escolheu a métrica: ${opcaoEscolhida}`, 'Dúvida', true);
+    setTimeout(() => fecharModalSimulacao(), 1500);
+  }
+
+  function enviarDiscovery(id) {
+    const input = document.getElementById('input-disc-usuario');
+    const texto = input.value.trim();
+    if(!texto) return;
+
+    const chat = document.getElementById('chat-discovery');
+    chat.innerHTML += `<div class="msg user">${texto}</div>`;
+    input.value = '';
+
+    setTimeout(() => {
+      chat.innerHTML += `<div class="msg ia">Interessante! O Agente aplicou a regra de Nielsen e identificou um padrão comportamental relevante. Síntese concluída.</div>`;
+      chat.scrollTop = chat.scrollHeight;
+      atualizarDadosPesquisa(id, texto, 'Frustração', true);
+    }, 600);
+  }
+
+  function atualizarDadosPesquisa(id, trecho, sentimento, temDor) {
+    const p = pesquisasCriadas.find(item => item.id === id);
+    if(p) {
+      p.respostasTotal++;
+      if(temDor) p.doresCount++;
+      p.trecho = trecho;
+      p.sentimento = sentimento;
+      p.insight = `Síntese IA atualizada via interação do Agente em ${new Date().toLocaleTimeString()}`;
+      renderizarDashboard();
+    }
+  }
+
+  function fecharModalSimulacao() {
+    document.getElementById('modal-simulacao').classList.remove('aberto');
+  }
+
+  function aprovarInsight(id) {
+    const p = pesquisasCriadas.find(item => item.id === id);
+    if(p) {
+      p.statusDesigner = 'Validado por Designer';
+      p.temConflito = false;
+      renderizarDashboard();
+    }
+  }
+
+  function resolverConflito(id) {
+    const p = pesquisasCriadas.find(item => item.id === id);
+    if(p) {
+      const escolha = confirm('Deseja que este novo insight substitua o anterior?');
+      if(escolha) {
+        p.temConflito = false;
+        p.statusDesigner = 'Validado por Designer (Substituiu anterior)';
+      } else {
+        p.temConflito = false;
+        p.statusDesigner = 'Descartado por Conflito';
+      }
+      renderizarDashboard();
+    }
+  }
+
+  window.onload = () => {
+    renderizarDashboard();
+  };
+</script>
+</body>
+</html>
